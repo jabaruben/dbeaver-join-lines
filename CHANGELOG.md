@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Place `Join Lines` directly below `Format SQL` in DBeaver's **Format** context submenu.
+- Add project screenshot and contribution guidelines/templates.
+
 ## [1.0.0] - 2026-08-19
 
 ### Added
