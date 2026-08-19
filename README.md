@@ -14,11 +14,17 @@ org.eclipse.ui.edit.text.join.lines
 
 inside DBeaver's dynamically created `Format` context submenu.
 
+## Screenshot
+
+![DBeaver Format menu showing Join Lines](docs/dbeaver-join-lines.png)
+
+> The keyboard shortcut shown in the screenshot is user-configured. The plugin itself does not define or override a shortcut.
+
 ## Why?
 
 DBeaver includes the underlying Eclipse `Join Lines` command, but it is not exposed in the SQL editor's **Format** context menu by default.
 
-This small plugin adds it there.
+This small plugin adds it there, directly below **Format SQL**.
 
 ## Installation
 
@@ -49,6 +55,7 @@ After installation:
 SQL editor
 └── Right click
     └── Format
+        ├── Format SQL
         └── Join Lines
 ```
 
@@ -149,22 +156,32 @@ The plugin contributes the existing Eclipse command:
 org.eclipse.ui.edit.text.join.lines
 ```
 
-to DBeaver's SQL editor submenu:
+to DBeaver's SQL editor submenu, immediately after DBeaver's `ContentFormatProposal` action:
 
 ```text
-popup:format?after=additions
+popup:format?after=ContentFormatProposal
 ```
 
 The plugin is packaged as an Eclipse feature and published as a local p2 repository. The portable installer uses the Eclipse p2 Director bundled with DBeaver.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+For bugs and feature requests, use the repository's issue templates.
 
 ## Project structure
 
 ```text
 .
 ├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── pull_request_template.md
 │   └── workflows/
 │       ├── validate.yml
 │       └── release.yml
+├── docs/
+│   └── dbeaver-join-lines.png
 ├── plugin/
 │   ├── plugin.xml
 │   └── META-INF/
@@ -177,6 +194,7 @@ The plugin is packaged as an Eclipse feature and published as a local p2 reposit
 ├── uninstall.ps1
 ├── README-INSTALL.txt
 ├── CHANGELOG.md
+├── CONTRIBUTING.md
 ├── LICENSE
 └── .gitignore
 ```
