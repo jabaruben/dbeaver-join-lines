@@ -1,4 +1,4 @@
-﻿param(
+param(
     [string]$DBeaverHome,
     [string]$Version = "1.0.0"
 )
@@ -36,6 +36,9 @@ function Convert-ToFileUri {
     return ([System.Uri]::new((Resolve-Path $Path).Path)).AbsoluteUri
 }
 
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Version must use semantic version format X.Y.Z (for example 1.0.1)."
+}
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DBeaverExe = Resolve-DBeaverExecutable -DBeaverHome $DBeaverHome
@@ -47,6 +50,7 @@ if (Get-Process dbeaver -ErrorAction SilentlyContinue) {
 $BuildRoot = Join-Path $ProjectRoot "build"
 $Site = Join-Path $BuildRoot "site"
 $Repo = Join-Path $BuildRoot "repository"
+$Generated = Join-Path $BuildRoot "generated"
 $Dist = Join-Path $ProjectRoot "dist"
 
 Remove-Item $BuildRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -55,6 +59,7 @@ Remove-Item $Dist -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force (Join-Path $Site "plugins") | Out-Null
 New-Item -ItemType Directory -Force (Join-Path $Site "features") | Out-Null
 New-Item -ItemType Directory -Force $Repo | Out-Null
+New-Item -ItemType Directory -Force $Generated | Out-Null
 New-Item -ItemType Directory -Force $Dist | Out-Null
 
 Add-Type -AssemblyName System.IO.Compression
@@ -63,16 +68,36 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $BundleId = "io.github.jabaruben.dbeaver.joinlines"
 $FeatureId = "io.github.jabaruben.dbeaver.joinlines.feature"
 
+# Generate versioned metadata without modifying the source tree.
+$ManifestSource = Join-Path $ProjectRoot "plugin\META-INF\MANIFEST.MF"
+$ManifestGenerated = Join-Path $Generated "MANIFEST.MF"
+(Get-Content $ManifestSource -Raw) `
+    -replace '(?m)^Bundle-Version:\s*.*$', "Bundle-Version: $Version" |
+    Set-Content $ManifestGenerated -Encoding ascii -NoNewline
+
+$FeatureSource = Join-Path $ProjectRoot "feature\feature.xml"
+$FeatureGenerated = Join-Path $Generated "feature.xml"
+$featureContent = Get-Content $FeatureSource -Raw
+$featureContent = $featureContent -replace 'version="\d+\.\d+\.\d+"', "version=`"$Version`""
+$featureContent | Set-Content $FeatureGenerated -Encoding utf8
+
+$CategorySource = Join-Path $ProjectRoot "category.xml"
+$CategoryGenerated = Join-Path $Generated "category.xml"
+$categoryContent = Get-Content $CategorySource -Raw
+$categoryContent = $categoryContent -replace 'io\.github\.jabaruben\.dbeaver\.joinlines\.feature_\d+\.\d+\.\d+\.jar', "$FeatureId`_$Version.jar"
+$categoryContent = $categoryContent -replace 'version="\d+\.\d+\.\d+"', "version=`"$Version`""
+$categoryContent | Set-Content $CategoryGenerated -Encoding utf8
+
 # Bundle JAR
 $PluginJar = Join-Path $Site "plugins\$BundleId`_$Version.jar"
-$PluginRoot = Join-Path $ProjectRoot "plugin"
+$PluginXml = Join-Path $ProjectRoot "plugin\plugin.xml"
 
 $fs = [System.IO.File]::Open($PluginJar, [System.IO.FileMode]::Create)
 $zip = New-Object System.IO.Compression.ZipArchive($fs, [System.IO.Compression.ZipArchiveMode]::Create)
 try {
     foreach ($spec in @(
-        @{ Source = (Join-Path $PluginRoot "META-INF\MANIFEST.MF"); Entry = "META-INF/MANIFEST.MF" },
-        @{ Source = (Join-Path $PluginRoot "plugin.xml"); Entry = "plugin.xml" }
+        @{ Source = $ManifestGenerated; Entry = "META-INF/MANIFEST.MF" },
+        @{ Source = $PluginXml; Entry = "plugin.xml" }
     )) {
         $entry = $zip.CreateEntry($spec.Entry)
         $stream = $entry.Open()
@@ -90,7 +115,6 @@ try {
 
 # Feature JAR
 $FeatureJar = Join-Path $Site "features\$FeatureId`_$Version.jar"
-$FeatureXml = Join-Path $ProjectRoot "feature\feature.xml"
 
 $fs = [System.IO.File]::Open($FeatureJar, [System.IO.FileMode]::Create)
 $zip = New-Object System.IO.Compression.ZipArchive($fs, [System.IO.Compression.ZipArchiveMode]::Create)
@@ -98,7 +122,7 @@ try {
     $entry = $zip.CreateEntry("feature.xml")
     $stream = $entry.Open()
     try {
-        $bytes = [System.IO.File]::ReadAllBytes($FeatureXml)
+        $bytes = [System.IO.File]::ReadAllBytes($FeatureGenerated)
         $stream.Write($bytes, 0, $bytes.Length)
     } finally {
         $stream.Dispose()
@@ -109,9 +133,9 @@ try {
 }
 
 $RepoUri = Convert-ToFileUri $Repo
-$CategoryUri = Convert-ToFileUri (Join-Path $ProjectRoot "category.xml")
+$CategoryUri = Convert-ToFileUri $CategoryGenerated
 
-Write-Host "Publishing features and bundles..."
+Write-Host "Publishing features and bundles for version $Version..."
 & $DBeaverExe `
     -nosplash `
     -application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher `
