@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest an improvement to the plugin, installer, or project tooling.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem would this change solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or implementation you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional. Describe any alternatives or workarounds you considered.
+
+  - type: input
+    id: dbeaver-version
+    attributes:
+      label: DBeaver version
+      description: Optional, but useful when the request depends on DBeaver UI behavior.
+      placeholder: e.g. 26.1.5 Community
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I checked existing issues for similar requests.
+          required: true
