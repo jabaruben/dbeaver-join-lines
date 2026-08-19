@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Tag must use vX.Y.Z format."
+          }
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Download DBeaver Community 26.1.5
+        shell: pwsh
+        run: |
+          $url = 'https://dbeaver.io/files/ea/dbeaver-ce-26.1.5-windows-x86_64.zip'
+          Invoke-WebRequest -Uri $url -OutFile dbeaver.zip
+          Expand-Archive dbeaver.zip -DestinationPath .dbeaver
+
+      - name: Locate DBeaver
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem .dbeaver -Recurse -Filter dbeaver.exe | Select-Object -First 1
+          if (-not $exe) {
+            throw 'dbeaver.exe was not found in the downloaded archive.'
+          }
+          "DBEAVER_HOME=$($exe.Directory.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build portable package
+        shell: pwsh
+        run: |
+          .\build.ps1 -DBeaverHome $env:DBEAVER_HOME -Version $env:VERSION
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $asset = "dist/DBeaverJoinLines-$env:VERSION-portable.zip"
+          gh release create "${{ github.ref_name }}" $asset `
+            --title "DBeaver Join Lines $env:VERSION" `
+            --generate-notes
