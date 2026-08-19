@@ -1,0 +1,25 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate XML files
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          for path in ["plugin/plugin.xml", "feature/feature.xml", "category.xml"]:
+              ET.parse(path)
+              print(f"OK: {path}")
+          PY
+
+      - name: Check identifiers
+        run: |
+          grep -q "io.github.jabaruben.dbeaver.joinlines" plugin/META-INF/MANIFEST.MF
+          grep -q "io.github.jabaruben.dbeaver.joinlines.feature" feature/feature.xml

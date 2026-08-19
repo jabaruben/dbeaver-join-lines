@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DBeaver Join Lines
+Bundle-SymbolicName: io.github.jabaruben.dbeaver.joinlines;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: Ruben Carracedo
+Bundle-Description: Adds the native Eclipse Join Lines command to the DBeaver SQL editor Format context menu.
+Bundle-DocURL: https://github.com/jabaruben/dbeaver-join-lines
+Bundle-License: MIT
+Bundle-Copyright: Copyright (c) 2026 Ruben Carracedo
+Require-Bundle: org.eclipse.ui
+

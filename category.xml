@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+    <feature
+        url="features/io.github.jabaruben.dbeaver.joinlines.feature_1.0.0.jar"
+        id="io.github.jabaruben.dbeaver.joinlines.feature"
+        version="1.0.0">
+        <category name="jabaruben.tools"/>
+    </feature>
+
+    <category-def
+        name="jabaruben.tools"
+        label="jabaruben tools">
+        <description>
+            Small DBeaver and Eclipse-based utilities by Ruben Carracedo.
+        </description>
+    </category-def>
+</site>

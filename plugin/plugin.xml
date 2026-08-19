@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution
+            allPopups="false"
+            locationURI="popup:format?after=additions">
+            <command
+                commandId="org.eclipse.ui.edit.text.join.lines"
+                label="Join Lines"
+                style="push">
+            </command>
+        </menuContribution>
+    </extension>
+</plugin>

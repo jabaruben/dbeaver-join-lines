@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="io.github.jabaruben.dbeaver.joinlines.feature"
+      label="DBeaver Join Lines"
+      version="1.0.0"
+      provider-name="Ruben Carracedo">
+
+   <description>
+      Adds the native Eclipse Join Lines command to the DBeaver SQL editor Format context menu.
+   </description>
+
+   <copyright>
+      Copyright (c) 2026 Ruben Carracedo
+   </copyright>
+
+   <license url="https://github.com/jabaruben/dbeaver-join-lines/blob/main/LICENSE">
+      MIT License
+   </license>
+
+   <plugin
+         id="io.github.jabaruben.dbeaver.joinlines"
+         download-size="0"
+         install-size="0"
+         version="1.0.0"
+         unpack="false"/>
+
+</feature>
